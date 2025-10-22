@@ -41,15 +41,20 @@ cp frontend/.env.example frontend/.env
 
 **必须字段**
 
-- `LLM_API_KEY`：默认读取的通用大语言模型密钥（向后兼容 `OPENAI_API_KEY`）。
-- `VITE_AMAP_KEY`：高德开放平台 Web JS API Key。
+后端 `backend/.env`：
+
+- `LLM_API_KEY`：通用大语言模型密钥。
+- `AMAP_WEB_KEY`：高德开放平台 JS API Key，Docker 模式下会自动透传给前端。
 - `SUPABASE_URL` & `SUPABASE_ANON_KEY`：可选，若配置则行程与费用会保存至 Supabase 数据库。未配置时使用内存存储（便于演示）。
+
+前端 `frontend/.env`：
+
+- `VITE_AMAP_KEY`：高德开放平台 Web JS API Key（建议与 `AMAP_WEB_KEY` 保持一致）。
 
 **自定义大模型服务（可选）**
 
 - `LLM_API_BASE_URL`：若使用自建 / 第三方兼容 OpenAI SDK 的服务，填写自定义请求地址。
 - `LLM_MODEL`：后端调用的默认模型名称，未配置时默认为 `gpt-4o-mini`。
-- 仍然兼容 `OPENAI_API_KEY`、`OPENAI_BASE_URL`，方便直接沿用原有配置。
 
 > ⚠️ 若使用其它语音识别 / LLM 服务，可在 `backend/src/services/llmService.js` 和 `frontend/src/hooks/useSpeechRecognition.js` 内按需替换 SDK。
 

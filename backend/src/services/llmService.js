@@ -5,7 +5,7 @@ let client = null;
 
 const getClient = () => {
   if (!config.llm.apiKey) {
-    throw new Error('LLM_API_KEY/OPENAI_API_KEY is not set.');
+    throw new Error('LLM_API_KEY is not set.');
   }
 
   if (!client) {
