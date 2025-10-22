@@ -1,0 +1,45 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 401 >>
+stream
+BT
+/F1 18 Tf
+72 780 Td
+(AI Travel Planner 提交信息) Tj
+/F1 12 Tf
+0 -16 Td
+(GitHub 仓库：待上传至公开仓库后填写实际地址) Tj
+0 -16 Td
+(README 下载：仓库根目录 README.md 提供运行与部署说明) Tj
+0 -16 Td
+(Docker 镜像：按照 README 中 docker compose 指令构建与运行) Tj
+0 -16 Td
+(如需 API Key，可在 README 中填写并保证 3 个月内有效。) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000693 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+763
+%%EOF
