@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { appConfig } from '../config.js';
 
 const scriptId = 'amap-sdk';
 
@@ -26,7 +27,7 @@ const loadAmap = (key) =>
 
     const script = document.createElement('script');
     script.id = scriptId;
-    script.src = `https://webapi.amap.com/maps?v=2.0&key=${key}`;
+    script.src = `https://webapi.amap.com/maps?v=2.0&key=${key}&plugin=AMap.Geocoder,AMap.PlaceSearch`;
     script.async = true;
     script.onload = () => resolve(window.AMap);
     script.onerror = () => reject(new Error('加载高德地图失败'));
@@ -35,6 +36,7 @@ const loadAmap = (key) =>
 
 const DestinationMap = ({ destination }) => {
   const containerRef = useRef(null);
+  const mapRef = useRef(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -44,37 +46,55 @@ const DestinationMap = ({ destination }) => {
   useEffect(() => {
     if (!destination) return;
 
-    const key = import.meta.env.VITE_AMAP_KEY;
-    loadAmap(key)
+    if (!appConfig.amapKey) {
+      setError('缺少高德地图 Key');
+      return;
+    }
+
+    loadAmap(appConfig.amapKey)
       .then((AMap) => {
         if (!containerRef.current) return;
+        mapRef.current?.destroy?.();
+
         const map = new AMap.Map(containerRef.current, {
-          zoom: 12,
+          zoom: 10,
           viewMode: '3D',
         });
-        AMap.plugin('AMap.PlaceSearch', () => {
-          const placeSearch = new AMap.PlaceSearch({
-            pageSize: 1,
-          });
-          placeSearch.search(destination, (status, result) => {
-            if (status === 'complete' && result.poiList?.pois?.length) {
-              const poi = result.poiList.pois[0];
-              map.setCenter(poi.location);
-              map.setZoom(12);
-              new AMap.Marker({
-                position: poi.location,
-                map,
-                title: poi.name,
-              });
-            } else {
+
+        mapRef.current = map;
+
+        AMap.plugin(['AMap.Geocoder', 'AMap.PlaceSearch'], () => {
+          const geocoder = new AMap.Geocoder({ city: '全国' });
+          geocoder.getLocation(destination, (status, result) => {
+            if (status !== 'complete' || !result?.geocodes?.length) {
               setError('未找到相关地点，请调整关键词。');
+              return;
             }
+
+            const location = result.geocodes[0].location;
+            const position = [location.lng, location.lat];
+
+            map.setCenter(position);
+            map.setZoom(12);
+
+            setError('');
+
+            new AMap.Marker({
+              position,
+              map,
+              title: result.geocodes[0].formattedAddress || destination,
+            });
           });
         });
       })
       .catch((error) => {
         setError(error.message);
       });
+
+    return () => {
+      mapRef.current?.destroy?.();
+      mapRef.current = null;
+    };
   }, [destination]);
 
   return (

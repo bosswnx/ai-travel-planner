@@ -3,6 +3,7 @@ import { createPlan, analyzeBudget } from '../services/api.js';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition.js';
 import MarkdownPreview from '../components/MarkdownPreview.jsx';
 import DestinationMap from '../components/DestinationMap.jsx';
+import { appConfig } from '../config.js';
 
 const defaultForm = {
   destination: '',
@@ -175,7 +176,9 @@ const DashboardPage = ({ context }) => {
         </form>
         <div>
           <h3 className="text-lg font-semibold text-emerald-200">目的地地图</h3>
-          <p className="mt-1 text-xs text-slate-400">配置 VITE_AMAP_KEY 后可实时预览目的地位置。</p>
+          <p className="mt-1 text-xs text-slate-400">
+            {appConfig.amapKey ? '地图将根据目的地自动定位。' : '在配置文件中补充地图 Key 后可实时预览目的地位置。'}
+          </p>
           <div className="mt-3 overflow-hidden rounded-2xl">
             <DestinationMap destination={form.destination} />
           </div>

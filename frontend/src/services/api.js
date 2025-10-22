@@ -1,18 +1,28 @@
-const API_BASE = import.meta.env.VITE_API_BASE || '';
+import { appConfig } from '../config.js';
+
+const normalizeBase = (base) => (base || '').replace(/\/+$/, '');
+
+const API_BASE = normalizeBase(appConfig.apiBase);
 
 const defaultHeaders = {
   'Content-Type': 'application/json',
 };
 
 const request = async (url, options = {}) => {
-  const endpoint = `${API_BASE}${url}`;
-  const res = await fetch(endpoint, {
-    ...options,
-    headers: {
-      ...defaultHeaders,
-      ...(options.headers || {}),
-    },
-  });
+  const endpoint = url.startsWith('http') ? url : `${API_BASE}${url}`;
+  let res;
+
+  try {
+    res = await fetch(endpoint, {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...(options.headers || {}),
+      },
+    });
+  } catch (error) {
+    throw new Error('网络请求失败，请检查后端服务是否可用或 API 地址是否正确配置。');
+  }
 
   if (!res.ok) {
     const errorBody = await res.json().catch(() => ({}));

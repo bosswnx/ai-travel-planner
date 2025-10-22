@@ -50,6 +50,9 @@ cp frontend/.env.example frontend/.env
 前端 `frontend/.env`：
 
 - `VITE_AMAP_KEY`：高德开放平台 Web JS API Key（建议与 `AMAP_WEB_KEY` 保持一致）。
+- `VITE_API_BASE`：可选，指定前端调用后端的基础 URL；若留空，系统会自动回退到当前站点域名。
+
+> 所有前端运行时配置会在 `frontend/src/config.js` 中集中读取，方便未来扩展或接入更多地图/模型服务。
 
 **自定义大模型服务（可选）**
 
@@ -148,6 +151,11 @@ create table expenses (
 
 3. **高德地图无显示？**
    - 确认 `VITE_AMAP_KEY` 已在高德控制台启用 JS API，并允许本地调试域名。
+   - 若页面提示缺少 Key，请在 `.env` 或部署平台中补充，并重新构建前端静态资源。
+
+4. **前端提示“网络请求失败，请检查后端服务是否可用或 API 地址是否正确配置。”？**
+   - 请确认 `frontend/src/config.js` 中解析到的 `apiBase` 地址可从浏览器访问（例如本地调试需同时运行后端服务）。
+   - 在生产部署中，建议显式设置 `VITE_API_BASE=https://你的后端域名`，以避免跨域或协议混用导致的请求失败。
 
 ## Docker 镜像发布参考
 
