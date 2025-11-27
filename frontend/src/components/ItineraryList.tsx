@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlanContent, ItineraryActivity } from '../services/api';
+import type { PlanContent, ItineraryActivity } from '../services/api';
 import { Calendar, MapPin, DollarSign, Clock } from 'lucide-react';
 
 interface ItineraryListProps {

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { VoiceInput } from './components/VoiceInput';
 import { TravelMap } from './components/TravelMap';
 import { ItineraryList } from './components/ItineraryList';
-import { generatePlan, TripPlan } from './services/api';
+import { generatePlan, type TripPlan } from './services/api';
 import { Send, Plane, Map as MapIcon, Loader2 } from 'lucide-react';
 
 function App() {
