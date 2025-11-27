@@ -1,5 +1,5 @@
 # 使用 Node.js 18 Alpine 镜像
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 

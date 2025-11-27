@@ -10,12 +10,8 @@ services:
     env_file:
       - ./backend/.env
     volumes:
-      # [热重载] 将本地代码挂载到容器
-      - ./backend:/workspace/backend
-      # [持久化] 数据库文件
-      - ./travel_planner.db:/workspace/travel_planner.db
-    # [热重载] 覆盖默认启动命令，开启 --reload
-    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+      # [修复] 挂载 data 目录而不是单个 db 文件，避免权限和创建问题
+      - ./data:/workspace/data
     networks:
       - travel-network
     restart: unless-stopped
@@ -28,12 +24,6 @@ services:
       - "5173:5173"
     env_file:
       - ./frontend/.env
-    volumes:
-      # [热重载] 将本地代码挂载到容器
-      - ./frontend:/app
-      # [重要] 这里的 /app/node_modules 是匿名挂载
-      # 它的作用是保留容器构建时生成的 node_modules，避免被宿主机的覆盖
-      - /app/node_modules
     depends_on:
       - backend
     networks:
