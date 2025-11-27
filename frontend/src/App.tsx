@@ -38,10 +38,10 @@ function App() {
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm z-20">
         <div className="flex items-center space-x-2 text-blue-600">
           <Plane size={28} className="transform -rotate-45" />
-          <h1 className="text-xl font-bold tracking-tight">AI Travel Planner</h1>
+          <h1 className="text-xl font-bold tracking-tight">AI 旅行规划师</h1>
         </div>
         <div className="text-sm text-gray-500">
-           Built with React + FastAPI + Qwen
+           基于 React + FastAPI + 通义千问
         </div>
       </header>
 
@@ -53,13 +53,13 @@ function App() {
            {/* Input Section */}
            <div className="p-4 border-b border-gray-100 bg-gray-50">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Where do you want to go?
+                你想去哪里？
               </label>
               <div className="relative">
                 <textarea
                   className="w-full p-4 pr-12 rounded-xl border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm resize-none text-sm"
                   rows={3}
-                  placeholder="e.g., Plan a 5-day trip to Kyoto, Japan with a budget of 10,000 CNY. I love anime and food."
+                  placeholder="例如：帮我规划一个去日本京都的5天行程，预算1万人民币，喜欢动漫和美食。"
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -86,15 +86,15 @@ function App() {
               {isLoading ? (
                  <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 space-y-4">
                     <Loader2 size={48} className="animate-spin text-blue-500"/>
-                    <p className="animate-pulse">AI is planning your perfect trip...</p>
+                    <p className="animate-pulse">AI 正在为你规划完美旅程...</p>
                  </div>
               ) : currentPlan ? (
                  <ItineraryList plan={currentPlan.content} />
               ) : (
                  <div className="h-full flex flex-col items-center justify-center text-gray-400 p-8 text-center">
                     <MapIcon size={64} className="mb-4 opacity-20"/>
-                    <p className="text-lg font-medium text-gray-500">Ready to explore?</p>
-                    <p className="text-sm">Tell me your destination, dates, and preferences to get started.</p>
+                    <p className="text-lg font-medium text-gray-500">准备好出发了吗？</p>
+                    <p className="text-sm">告诉我你的目的地、日期和偏好，即刻启程。</p>
                  </div>
               )}
            </div>

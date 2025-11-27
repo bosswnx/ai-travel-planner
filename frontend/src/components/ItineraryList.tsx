@@ -6,6 +6,14 @@ interface ItineraryListProps {
   plan: PlanContent;
 }
 
+const budgetCategoryMap: Record<string, string> = {
+  accommodation: "住宿",
+  transport: "交通",
+  food: "餐饮",
+  activities: "活动/门票",
+  misc: "其他",
+};
+
 export const ItineraryList: React.FC<ItineraryListProps> = ({ plan }) => {
   return (
     <div className="space-y-6 p-4 overflow-y-auto h-full custom-scrollbar">
@@ -14,18 +22,18 @@ export const ItineraryList: React.FC<ItineraryListProps> = ({ plan }) => {
         <h2 className="text-2xl font-bold text-gray-800 mb-2">{plan.title}</h2>
         <p className="text-gray-600 mb-4">{plan.summary}</p>
         <div className="flex items-center space-x-4 text-sm font-medium text-gray-500">
-             <span className="flex items-center"><DollarSign size={16} className="mr-1 text-green-600"/> Total: {plan.total_budget_estimate}</span>
-             <span className="flex items-center"><Calendar size={16} className="mr-1 text-blue-600"/> {plan.itinerary.length} Days</span>
+             <span className="flex items-center"><DollarSign size={16} className="mr-1 text-green-600"/> 预估总价: {plan.total_budget_estimate}</span>
+             <span className="flex items-center"><Calendar size={16} className="mr-1 text-blue-600"/> {plan.itinerary.length} 天</span>
         </div>
       </div>
 
       {/* Budget Breakdown */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-        <h3 className="font-semibold text-gray-700 mb-3">Estimated Budget Breakdown</h3>
+        <h3 className="font-semibold text-gray-700 mb-3">预算明细估算</h3>
         <div className="grid grid-cols-2 gap-3 text-sm">
            {Object.entries(plan.budget_breakdown).map(([key, value]) => (
-             <div key={key} className="flexjustify-between p-2 bg-gray-50 rounded-lg">
-               <span className="capitalize text-gray-600">{key}</span>
+             <div key={key} className="flex justify-between p-2 bg-gray-50 rounded-lg">
+               <span className="capitalize text-gray-600">{budgetCategoryMap[key] || key}</span>
                <span className="font-bold text-gray-800 float-right">{value}</span>
              </div>
            ))}

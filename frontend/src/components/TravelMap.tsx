@@ -22,8 +22,8 @@ export const TravelMap: React.FC<TravelMapProps> = ({ location }) => {
       return (
           <div className="w-full h-full rounded-xl overflow-hidden shadow-lg border border-gray-200 relative bg-gray-100 flex items-center justify-center">
             <div className="text-center p-4">
-               <p className="text-red-600 font-bold mb-2">AMap API Key Missing</p>
-               <p className="text-sm text-gray-600">Please add VITE_AMAP_KEY to frontend/.env</p>
+               <p className="text-red-600 font-bold mb-2">高德地图 Key 未配置</p>
+               <p className="text-sm text-gray-600">请在 frontend/.env 文件中配置 VITE_AMAP_KEY</p>
             </div>
           </div>
       )

@@ -50,7 +50,7 @@ export const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, isProcessi
   };
 
   if (!recognition) {
-    return <div className="text-xs text-gray-400">Browser doesn't support speech API</div>;
+    return <div className="text-xs text-gray-400">浏览器不支持语音识别</div>;
   }
 
   return (
@@ -62,7 +62,7 @@ export const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, isProcessi
           ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
           : 'bg-blue-600 hover:bg-blue-700'
       } text-white disabled:opacity-50 disabled:cursor-not-allowed`}
-      title={isListening ? "Listening..." : "Click to speak"}
+      title={isListening ? "正在聆听..." : "点击开始语音输入"}
     >
       {isListening ? <MicOff size={24} /> : <Mic size={24} />}
     </button>
