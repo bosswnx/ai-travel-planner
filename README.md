@@ -8,10 +8,11 @@
 ![Python](https://img.shields.io/badge/Python-3.10+-yellow.svg)
 ![React](https://img.shields.io/badge/React-18-cyan.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green.svg)
+![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)
 
 ## ✨ 核心功能
 
-*   **🎙️ 智能语音交互**: 集成 Web Speech API，支持直接语音输入需求（如“帮我规划一个去日本的5天行程，预算1万，带孩子”）。
+*   **🎙️ 智能语音交互**: 集成 Web Speech API，支持直接语音输入需求（如“帮我规划一个去日本的5天行程，预算1万，喜欢吃火锅”）。
 *   **🧠 AI 深度规划**: 后端接入 **阿里云百炼 (Qwen/通义千问)** 大模型，生成结构化的 JSON 行程数据。
 *   **🗺️ 地图可视化**: 集成 **高德地图 (AMap)**，根据行程地点自动定位展示。
 *   **💰 预算估算**: AI 自动分析交通、住宿、餐饮等费用，提供预算明细。
@@ -36,69 +37,101 @@
 
 ## 🚀 快速开始
 
-### 1. 环境准备
-确保你的环境已安装：
-*   Python 3.10+
-*   Node.js 18+ & npm
-
-### 2. 获取 API Key
+### 1. 获取 API Key
 本项目需要以下服务的 API Key 才能正常运行：
 *   **AI 能力**: [阿里云百炼 (DashScope)](https://bailian.console.aliyun.com/)
 *   **地图服务**: [高德地图开放平台 (AMap)](https://console.amap.com/) (Web 端 JS API)
 
-### 3. 后端设置
+### 2. 配置环境变量
+请在项目根目录下的 `backend/.env` 和 `frontend/.env` 文件中填入你的 API Key。
 
+```bash
+# 后端环境变量 (backend/.env)
+DASHSCOPE_API_KEY=your_dashscope_api_key_here
+
+# 前端环境变量 (frontend/.env)
+VITE_AMAP_KEY=your_amap_key_here
+VITE_AMAP_SECURITY_CODE=your_amap_security_code_here
+```
+> **重要**: 请勿将 `.env` 文件提交到版本控制中。`.gitignore` 文件已配置以忽略这些文件。
+
+### 3. 使用 Docker Compose (推荐)
+
+最简单、推荐的启动方式是使用 Docker Compose，它会自动构建环境并启动前后端服务，并支持热重载。
+
+#### 3.1. 安装 Docker
+请确保你的系统已经安装了 [Docker](https://docs.docker.com/get-docker/)。
+
+#### 3.2. 启动服务
+在项目根目录下运行：
+```bash
+# 首次运行或有依赖/代码改动后，建议使用 --build
+docker-compose up --build
+
+# 后续可以直接使用
+# docker-compose up
+```
+这会启动两个服务：
+*   `backend`: 运行在 `http://localhost:8000`
+*   `frontend`: 运行在 `http://localhost:5173`
+
+#### 3.3. 停止服务
+在终端按 `Ctrl+C` 即可停止服务。
+如果需要彻底清除容器，可以运行：
+```bash
+docker-compose down
+```
+
+#### 3.4. 热重载说明
+*   **后端**: Docker Compose 配置已支持热重载。修改 `backend/` 目录下的 Python 文件后，Uvicorn 会自动重启。
+*   **前端**: Docker Compose 配置已支持热重载。修改 `frontend/src/` 目录下的 React 文件后，Vite 会自动更新浏览器内容。
+    *   **如果前端热重载失效**：在某些 Docker 环境中 (尤其是在共享文件系统上)，文件监听可能无法正常工作。你可以编辑 `frontend/vite.config.ts` 文件，强制 Vite 使用轮询模式：
+        ```typescript
+        // frontend/vite.config.ts
+        import { defineConfig } from 'vite'
+        import react from '@vitejs/plugin-react'
+
+        export default defineConfig({
+          plugins: [react()],
+          server: {
+            host: true, // 确保容器内外部可访问
+            watch: {
+              usePolling: true // <--- 添加这一行
+            }
+          }
+        })
+        ```
+
+### 4. 手动启动 (非 Docker)
+
+如果你不想使用 Docker，也可以手动在本地启动前后端服务。
+
+#### 4.1. 启动后端
 ```bash
 # 1. 进入项目根目录
 cd ai-travel-planner
 
-# 2. 创建并激活虚拟环境
-python3 -m venv venv
+# 2. 激活虚拟环境 (如果之前创建了的话)
 source venv/bin/activate  # Linux/macOS
 # venv\Scripts\activate   # Windows
 
-# 3. 安装依赖
-pip install -r backend/requirements.txt
-
-# 4. 配置环境变量
-cp backend/.env.example backend/.env
-# ⚠️ 编辑 backend/.env 文件，填入你的 DASHSCOPE_API_KEY
+# 3. 启动服务 (默认端口 8000)
+uvicorn backend.main:app --reload
 ```
 
-### 4. 前端设置
-
+#### 4.2. 启动前端
 ```bash
 # 1. 进入前端目录
 cd frontend
 
-# 2. 安装依赖
+# 2. 安装依赖 (如果尚未安装)
 npm install
 
-# 3. 配置环境变量
-cp .env.example .env
-# ⚠️ 编辑 frontend/.env 文件，填入你的 VITE_AMAP_KEY 和 VITE_AMAP_SECURITY_CODE
-```
-
-### 5. 启动项目
-
-你需要打开两个终端窗口分别启动前后端。
-
-**终端 1 (后端):**
-```bash
-# 确保在根目录下且已激活虚拟环境
-source venv/bin/activate
-uvicorn backend.main:app --reload
-# 服务运行在: http://localhost:8000
-```
-
-**终端 2 (前端):**
-```bash
-cd frontend
+# 3. 启动服务 (默认端口 5173)
 npm run dev
-# 服务运行在: http://localhost:5173
 ```
 
-打开浏览器访问 `http://localhost:5173` 即可开始使用！
+然后浏览器访问 `http://localhost:5173`。
 
 ---
 
@@ -107,24 +140,34 @@ npm run dev
 ```
 ai-travel-planner/
 ├── backend/                 # Python FastAPI 后端
+│   ├── Dockerfile           # 后端 Dockerfile
 │   ├── routers/             # API 路由定义
 │   ├── services/            # 业务逻辑 (AI 调用封装)
 │   ├── models.py            # 数据库模型
 │   ├── schemas.py           # Pydantic 数据验证模式
 │   ├── main.py              # 应用入口
-│   └── database.py          # 数据库连接
+│   ├── database.py          # 数据库连接
+│   └── requirements.txt     # Python 依赖
 ├── frontend/                # React TypeScript 前端
-│   ├── src/
+│   ├── Dockerfile           # 前端 Dockerfile
+│   ├── public/              # 静态资源
+│   ├── src/                 # 前端源代码
 │   │   ├── components/      # UI 组件 (地图, 语音, 行程列表)
 │   │   ├── services/        # API 请求封装
 │   │   └── App.tsx          # 主页面
-│   └── ...
-└── README.md
+│   ├── index.html           # 页面入口
+│   ├── package.json         # Node.js/npm 依赖
+│   └── tsconfig.json        # TypeScript 配置
+├── docker-compose.yml       # Docker 编排文件
+├── .env.example             # 环境变量示例文件
+├── .gitignore               # Git 忽略文件
+└── README.md                # 项目说明
 ```
 
 ## 📝 开发注意事项
 
-*   **语音识别**: 浏览器的 Web Speech API 在某些浏览器（如 Chrome）中可能需要 HTTPS 环境或 localhost 才能正常工作。
+*   **API Key 安全**: `.env` 文件用于存储敏感信息，已配置 Git 忽略，请勿提交。
+*   **语音识别**: 浏览器的 Web Speech API 在某些浏览器中可能需要 HTTPS 环境或 `localhost` 才能正常工作。
 *   **地图 Key**: 确保高德地图 Key 的类型是 "Web端 (JS API)"，并且正确配置了安全密钥 (Security Code)，否则地图可能无法加载。
 
 ## 🤝 贡献
