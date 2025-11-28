@@ -12,10 +12,12 @@
 
 ## ✨ 核心功能
 
+*   **🔐 用户认证**: 支持用户注册、登录，确保个人旅行计划的私密性与安全性。
+*   **💾 个人计划管理**: 用户登录后，可保存当前旅行规划，并在后续访问时重新加载和管理（查看、删除）自己的历史行程。
 *   **🇨🇳 全中文界面**: 界面文本已完全汉化，贴合中文用户使用习惯。
 *   **🎙️ 智能语音交互**: 集成 Web Speech API，支持直接语音输入需求（如“帮我规划一个去日本的5天行程，预算1万，喜欢吃火锅”）。
 *   **🧠 AI 深度规划**: 后端接入 **阿里云百炼 (Qwen/通义千问)** 大模型，生成结构化的 JSON 行程数据。
-*   **🗺️ 地图可视化**: 集成 **高德地图 (AMap)**，根据行程地点自动定位展示。
+*   **🗺️ 地图可视化**: 集成 **高德地图 (AMap)**，根据行程地点自动定位展示，并针对目的地城市进行精确搜索，避免地点混淆。
 *   **💰 预算估算**: AI 自动分析交通、住宿、餐饮等费用，提供预算明细。
 *   **📱 响应式设计**: 清晰的时间轴展示和美观的 UI 设计 (Tailwind CSS)。
 
@@ -122,8 +124,10 @@ npm run dev
 ai-travel-planner/
 ├── backend/                 # Python FastAPI 后端
 │   ├── Dockerfile           # 后端 Dockerfile
-│   ├── routers/             # API 路由定义
+│   ├── routers/             # API 路由定义 (包含认证和计划路由)
 │   ├── services/            # 业务逻辑 (AI 调用封装)
+│   ├── dependencies.py      # 依赖注入，用于用户认证
+│   ├── security.py          # 密码哈希和 JWT 令牌管理
 │   ├── models.py            # 数据库模型
 │   ├── schemas.py           # Pydantic 数据验证模式
 │   ├── main.py              # 应用入口
@@ -133,9 +137,11 @@ ai-travel-planner/
 │   ├── Dockerfile           # 前端 Dockerfile
 │   ├── public/              # 静态资源
 │   ├── src/                 # 前端源代码
+│   │   ├── context/         # 全局状态管理 (如认证上下文)
+│   │   ├── pages/           # 页面组件 (如登录、注册、主页)
 │   │   ├── components/      # UI 组件 (地图, 语音, 行程列表)
 │   │   ├── services/        # API 请求封装
-│   │   └── App.tsx          # 主页面
+│   │   └── App.tsx          # 应用主入口 (包含路由)
 │   ├── index.html           # 页面入口
 │   ├── package.json         # Node.js/npm 依赖
 │   └── tsconfig.json        # TypeScript 配置
