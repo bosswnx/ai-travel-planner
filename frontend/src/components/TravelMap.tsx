@@ -3,9 +3,10 @@ import AMapLoader from '@amap/amap-jsapi-loader';
 
 interface TravelMapProps {
   locations: string[]; // List of location names
+  city?: string; // City to scope the search
 }
 
-export const TravelMap: React.FC<TravelMapProps> = ({ locations }) => {
+export const TravelMap: React.FC<TravelMapProps> = ({ locations, city }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const [isMapReady, setIsMapReady] = useState(false);
@@ -28,7 +29,7 @@ export const TravelMap: React.FC<TravelMapProps> = ({ locations }) => {
     AMapLoader.load({
       key: AMAP_KEY,
       version: "2.0",
-      plugins: ['AMap.Marker', 'AMap.ToolBar', 'AMap.Scale', 'AMap.Geocoder'], 
+      plugins: ['AMap.Marker', 'AMap.ToolBar', 'AMap.Scale', 'AMap.PlaceSearch', 'AMap.Geocoder'], 
     })
       .then((AMap) => {
         if (!mapContainerRef.current) return;
@@ -64,9 +65,15 @@ export const TravelMap: React.FC<TravelMapProps> = ({ locations }) => {
     
     const map = mapInstanceRef.current;
     const AMap = window.AMap;
-    const geocoder = new AMap.Geocoder();
+    
+    // Initialize PlaceSearch
+    const placeSearch = new AMap.PlaceSearch({
+        pageSize: 1, // We only need the best match
+        extensions: 'base',
+        city: city || "", // Scope search to city if provided
+    });
 
-    console.log("TravelMap: Received locations:", locations);
+    console.log("TravelMap: Received locations:", locations, "City:", city);
 
     // Clear existing markers
     map.clearMap();
@@ -75,48 +82,51 @@ export const TravelMap: React.FC<TravelMapProps> = ({ locations }) => {
       const markers: any[] = [];
       let completedCount = 0;
 
+      // Helper function to check if all processed
+      const checkCompletion = () => {
+          completedCount++;
+          if (completedCount === locations.length) {
+               console.log(`TravelMap: All requests finished. Success count: ${markers.length}/${locations.length}. Fitting view...`);
+               if (markers.length > 0) {
+                   setTimeout(() => {
+                       map.setFitView(markers, false, [60, 60, 60, 60]);
+                       // Fallback: center on first marker if fitView acts weirdly
+                       if (markers.length > 0) {
+                           // Optional: map.setCenter(markers[0].getPosition());
+                       }
+                   }, 500);
+               }
+          }
+      };
+
       locations.forEach((locName) => {
-        console.log(`TravelMap: Geocoding '${locName}'...`);
-        geocoder.getLocation(locName, (status: string, result: any) => {
-           completedCount++;
-           if (status === 'complete' && result.geocodes.length) {
-               console.log(`TravelMap: Geocode Success for '${locName}'`, result.geocodes[0].location);
-               const lngLat = result.geocodes[0].location;
+        console.log(`TravelMap: Searching '${locName}'...`);
+        
+        placeSearch.search(locName, (status: string, result: any) => {
+           if (status === 'complete' && result.poiList && result.poiList.pois && result.poiList.pois.length > 0) {
+               const poi = result.poiList.pois[0];
+               console.log(`TravelMap: Search Success for '${locName}'`, poi.location);
+               
                const marker = new AMap.Marker({
-                   position: lngLat,
-                   title: locName,
+                   position: poi.location,
+                   title: poi.name, // Use POI name which might be more accurate
                    label: {
                      content: `<div class="text-xs bg-white border border-gray-200 rounded shadow-sm px-2 py-1 whitespace-nowrap">${locName}</div>`,
                      direction: 'top'
                    }
                });
+               // Add click event to show info window or details
+               marker.on('click', () => {
+                   // Optional: Show more details
+                   console.log("Marker clicked:", poi);
+               });
+
                map.add(marker);
                markers.push(marker);
            } else {
-               console.warn(`TravelMap: Geocode Failed for '${locName}'. Status: ${status}`);
+               console.warn(`TravelMap: Search Failed/No Data for '${locName}'. Status: ${status}`);
            }
-
-           // When all requests finish (success or fail), fit view
-           if (completedCount === locations.length) {
-               console.log(`TravelMap: All requests finished. Success count: ${markers.length}/${locations.length}. Fitting view...`);
-               if (markers.length > 0) {
-                   // Use a timeout to ensure map render cycle catches up
-                   setTimeout(() => {
-                       // Force fit view with a nice padding
-                       map.setFitView(markers, false, [60, 60, 60, 60]);
-                       console.log("TravelMap: setFitView called");
-                       
-                       // Fallback/Confirmation: Pan to the first marker to ensure movement
-                       // This ensures the user sees *something* even if bounds are weird
-                       if (markers.length > 0) {
-                           map.setCenter(markers[0].getPosition());
-                           map.setZoom(13); // Ensure we are zoomed in reasonably
-                           // Then fit view again to include others
-                           map.setFitView(markers, false, [60, 60, 60, 60]);
-                       }
-                   }, 500);
-               }
-           }
+           checkCompletion();
         });
       });
     }

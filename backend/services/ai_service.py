@@ -23,6 +23,7 @@ class AIService:
         The JSON structure must be exactly as follows:
         {
             "title": "A short, catchy title for the trip",
+            "destination_city": "The main city name for this trip (e.g., 'Beijing', 'Tokyo'). Used for map scoping.",
             "summary": "A brief summary of the trip style and highlights",
             "total_budget_estimate": "Estimated total cost string (e.g., '15000 CNY')",
             "itinerary": [

@@ -41,6 +41,7 @@ export interface BudgetBreakdown {
 
 export interface PlanContent {
   title: string;
+  destination_city: string;
   summary: string;
   total_budget_estimate: string;
   itinerary: ItineraryDay[];

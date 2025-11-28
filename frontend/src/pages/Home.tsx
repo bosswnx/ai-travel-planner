@@ -199,7 +199,10 @@ const Home: React.FC = () => {
 
         {/* Right Panel: Map */}
         <div className="hidden md:block flex-1 bg-gray-100 relative">
-           <TravelMap locations={locationNames} />
+           <TravelMap 
+              locations={locationNames} 
+              city={currentPlan?.content?.destination_city}
+           />
         </div>
       </main>
     </div>
