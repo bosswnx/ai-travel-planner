@@ -1,46 +1,141 @@
-import React from 'react';
-import { Map, Marker, APILoader } from '@uiw/react-amap';
+import React, { useEffect, useRef, useState } from 'react';
+import AMapLoader from '@amap/amap-jsapi-loader';
 
 interface TravelMapProps {
-  location?: string; // Center location name
+  locations: string[]; // List of location names
 }
 
-export const TravelMap: React.FC<TravelMapProps> = ({ location }) => {
-  // Use environment variables
+export const TravelMap: React.FC<TravelMapProps> = ({ locations }) => {
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
+
   const AMAP_KEY = import.meta.env.VITE_AMAP_KEY || "";
   const SECURITY_CODE = import.meta.env.VITE_AMAP_SECURITY_CODE || "";
 
   // Inject security code global
   if (typeof window !== 'undefined' && SECURITY_CODE) {
-     // @ts-ignore
+    // @ts-ignore
     window._AMapSecurityConfig = {
       securityJsCode: SECURITY_CODE,
     };
   }
 
+  // Load Map
+  useEffect(() => {
+    if (!AMAP_KEY) return;
+
+    AMapLoader.load({
+      key: AMAP_KEY,
+      version: "2.0",
+      plugins: ['AMap.Marker', 'AMap.ToolBar', 'AMap.Scale', 'AMap.Geocoder'], 
+    })
+      .then((AMap) => {
+        if (!mapContainerRef.current) return;
+
+        if (!mapInstanceRef.current) {
+          mapInstanceRef.current = new AMap.Map(mapContainerRef.current, {
+            viewMode: "2D", 
+            zoom: 10,
+            center: [116.397428, 39.90923], 
+          });
+          
+          mapInstanceRef.current.add(new AMap.ToolBar());
+          mapInstanceRef.current.add(new AMap.Scale());
+          setIsMapReady(true);
+        }
+      })
+      .catch((e) => {
+        console.error("AMap load failed", e);
+      });
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.destroy();
+        mapInstanceRef.current = null;
+        setIsMapReady(false);
+      }
+    };
+  }, [AMAP_KEY]);
+
+  // Update markers when locations change or map is ready
+  useEffect(() => {
+    if (!isMapReady || !mapInstanceRef.current || !window.AMap) return;
+    
+    const map = mapInstanceRef.current;
+    const AMap = window.AMap;
+    const geocoder = new AMap.Geocoder();
+
+    console.log("TravelMap: Received locations:", locations);
+
+    // Clear existing markers
+    map.clearMap();
+
+    if (locations && locations.length > 0) {
+      const markers: any[] = [];
+      let completedCount = 0;
+
+      locations.forEach((locName) => {
+        console.log(`TravelMap: Geocoding '${locName}'...`);
+        geocoder.getLocation(locName, (status: string, result: any) => {
+           completedCount++;
+           if (status === 'complete' && result.geocodes.length) {
+               console.log(`TravelMap: Geocode Success for '${locName}'`, result.geocodes[0].location);
+               const lngLat = result.geocodes[0].location;
+               const marker = new AMap.Marker({
+                   position: lngLat,
+                   title: locName,
+                   label: {
+                     content: `<div class="text-xs bg-white border border-gray-200 rounded shadow-sm px-2 py-1 whitespace-nowrap">${locName}</div>`,
+                     direction: 'top'
+                   }
+               });
+               map.add(marker);
+               markers.push(marker);
+           } else {
+               console.warn(`TravelMap: Geocode Failed for '${locName}'. Status: ${status}`);
+           }
+
+           // When all requests finish (success or fail), fit view
+           if (completedCount === locations.length) {
+               console.log(`TravelMap: All requests finished. Success count: ${markers.length}/${locations.length}. Fitting view...`);
+               if (markers.length > 0) {
+                   // Use a timeout to ensure map render cycle catches up
+                   setTimeout(() => {
+                       // Force fit view with a nice padding
+                       map.setFitView(markers, false, [60, 60, 60, 60]);
+                       console.log("TravelMap: setFitView called");
+                       
+                       // Fallback/Confirmation: Pan to the first marker to ensure movement
+                       // This ensures the user sees *something* even if bounds are weird
+                       if (markers.length > 0) {
+                           map.setCenter(markers[0].getPosition());
+                           map.setZoom(13); // Ensure we are zoomed in reasonably
+                           // Then fit view again to include others
+                           map.setFitView(markers, false, [60, 60, 60, 60]);
+                       }
+                   }, 500);
+               }
+           }
+        });
+      });
+    }
+  }, [locations, isMapReady]);
+
   if (!AMAP_KEY) {
-      return (
-          <div className="w-full h-full rounded-xl overflow-hidden shadow-lg border border-gray-200 relative bg-gray-100 flex items-center justify-center">
-            <div className="text-center p-4">
-               <p className="text-red-600 font-bold mb-2">高德地图 Key 未配置</p>
-               <p className="text-sm text-gray-600">请在 frontend/.env 文件中配置 VITE_AMAP_KEY</p>
-            </div>
-          </div>
-      )
+    return (
+      <div className="w-full h-full rounded-xl overflow-hidden shadow-lg border border-gray-200 relative bg-gray-100 flex items-center justify-center">
+        <div className="text-center p-4">
+          <p className="text-red-600 font-bold mb-2">高德地图 Key 未配置</p>
+          <p className="text-sm text-gray-600">请在 frontend/.env 文件中配置 VITE_AMAP_KEY</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="w-full h-full rounded-xl overflow-hidden shadow-lg border border-gray-200 relative">
-      <div style={{ width: '100%', height: '100%' }}>
-        <APILoader akey={AMAP_KEY}>
-            <Map 
-                zoom={10} 
-                center={[116.397428, 39.90923]} // Default to Beijing
-            >
-               <Marker position={[116.397428, 39.90923]} />
-            </Map>
-        </APILoader>
-      </div>
+      <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
     </div>
   );
 };

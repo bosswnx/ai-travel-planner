@@ -32,7 +32,7 @@ class AIService:
                     "activities": [
                         {
                             "time": "09:00",
-                            "location": "Name of the place",
+                            "location": "Name of the place. Must be a specific, searchable place name for map geocoding (e.g., 'The Palace Museum'). Do NOT include descriptive text, notes, parentheses, or actions like 'Lunch at...'.",
                             "description": "What to do here",
                             "cost_estimate": "Estimated cost for this activity",
                             "type": "sightseeing|food|transport|accommodation"

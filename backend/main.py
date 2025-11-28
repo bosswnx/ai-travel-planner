@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from backend import models, database
-from backend.routers import plans
+from backend.routers import plans, auth
 
 # Load environment variables
 load_dotenv()
@@ -22,6 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(plans.router)
 
 @app.get("/")

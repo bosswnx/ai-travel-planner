@@ -4,6 +4,7 @@ from backend.database import get_db
 from backend.models import TripPlan, User
 from backend.schemas import PlanCreate, PlanResponse
 from backend.services.ai_service import AIService
+from backend.dependencies import get_current_user
 import json
 
 router = APIRouter(
@@ -11,12 +12,8 @@ router = APIRouter(
     tags=["plans"]
 )
 
-# Mock auth dependency - in production this would verify a JWT
-def get_current_user_id():
-    return 1 # Hardcoded for prototype simplicity
-
 @router.post("/generate", response_model=PlanResponse)
-def generate_plan(plan: PlanCreate, db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id)):
+def generate_plan(plan: PlanCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # 1. Call AI
     ai_result = AIService.generate_itinerary(plan.user_input)
     
@@ -31,7 +28,7 @@ def generate_plan(plan: PlanCreate, db: Session = Depends(get_db), user_id: int 
         days=len(ai_result.get("itinerary", [])),
         budget=ai_result.get("total_budget_estimate", "N/A"),
         content=json.dumps(ai_result), # Store as string
-        user_id=user_id
+        user_id=current_user.id
     )
     
     db.add(db_plan)
@@ -47,8 +44,8 @@ def generate_plan(plan: PlanCreate, db: Session = Depends(get_db), user_id: int 
     )
 
 @router.get("/", response_model=list[PlanResponse])
-def get_my_plans(db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id)):
-    plans = db.query(TripPlan).filter(TripPlan.user_id == user_id).all()
+def get_my_plans(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    plans = db.query(TripPlan).filter(TripPlan.user_id == current_user.id).all()
     # Parse JSON content back to dict for response
     results = []
     for p in plans:
@@ -64,3 +61,13 @@ def get_my_plans(db: Session = Depends(get_db), user_id: int = Depends(get_curre
             created_at=p.created_at.isoformat()
         ))
     return results
+
+@router.delete("/{plan_id}")
+def delete_plan(plan_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    plan = db.query(TripPlan).filter(TripPlan.id == plan_id, TripPlan.user_id == current_user.id).first()
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plan not found")
+    
+    db.delete(plan)
+    db.commit()
+    return {"message": "Plan deleted successfully"}

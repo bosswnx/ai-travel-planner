@@ -12,6 +12,7 @@
 
 ## ✨ 核心功能
 
+*   **🇨🇳 全中文界面**: 界面文本已完全汉化，贴合中文用户使用习惯。
 *   **🎙️ 智能语音交互**: 集成 Web Speech API，支持直接语音输入需求（如“帮我规划一个去日本的5天行程，预算1万，喜欢吃火锅”）。
 *   **🧠 AI 深度规划**: 后端接入 **阿里云百炼 (Qwen/通义千问)** 大模型，生成结构化的 JSON 行程数据。
 *   **🗺️ 地图可视化**: 集成 **高德地图 (AMap)**，根据行程地点自动定位展示。
@@ -57,7 +58,7 @@ VITE_AMAP_SECURITY_CODE=your_amap_security_code_here
 
 ### 3. 使用 Docker Compose (推荐)
 
-最简单、推荐的启动方式是使用 Docker Compose，它会自动构建环境并启动前后端服务，并支持热重载。
+最简单、推荐的启动方式是使用 Docker Compose，它会自动构建环境并启动前后端服务。
 
 #### 3.1. 安装 Docker
 请确保你的系统已经安装了 [Docker](https://docs.docker.com/get-docker/)。
@@ -65,10 +66,10 @@ VITE_AMAP_SECURITY_CODE=your_amap_security_code_here
 #### 3.2. 启动服务
 在项目根目录下运行：
 ```bash
-# 首次运行或有依赖/代码改动后，建议使用 --build
+# 首次运行或修改代码后，请务必加上 --build 重新构建镜像
 docker-compose up --build
 
-# 后续可以直接使用
+# 如果代码没有修改，可以直接使用
 # docker-compose up
 ```
 这会启动两个服务：
@@ -81,26 +82,6 @@ docker-compose up --build
 ```bash
 docker-compose down
 ```
-
-#### 3.4. 热重载说明
-*   **后端**: Docker Compose 配置已支持热重载。修改 `backend/` 目录下的 Python 文件后，Uvicorn 会自动重启。
-*   **前端**: Docker Compose 配置已支持热重载。修改 `frontend/src/` 目录下的 React 文件后，Vite 会自动更新浏览器内容。
-    *   **如果前端热重载失效**：在某些 Docker 环境中 (尤其是在共享文件系统上)，文件监听可能无法正常工作。你可以编辑 `frontend/vite.config.ts` 文件，强制 Vite 使用轮询模式：
-        ```typescript
-        // frontend/vite.config.ts
-        import { defineConfig } from 'vite'
-        import react from '@vitejs/plugin-react'
-
-        export default defineConfig({
-          plugins: [react()],
-          server: {
-            host: true, // 确保容器内外部可访问
-            watch: {
-              usePolling: true // <--- 添加这一行
-            }
-          }
-        })
-        ```
 
 ### 4. 手动启动 (非 Docker)
 

@@ -12,6 +12,13 @@ class User(UserBase):
     class Config:
         orm_mode = True
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
 class PlanBase(BaseModel):
     user_input: str # The raw text from voice/text input
 
